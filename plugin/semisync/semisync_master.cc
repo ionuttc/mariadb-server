@@ -479,7 +479,7 @@ void ReplSemiSyncMaster::add_slave()
 void ReplSemiSyncMaster::remove_slave()
 {
   lock();
-  assert(rpl_semi_sync_master_clients > 0);
+  //assert(rpl_semi_sync_master_clients > 0);
   rpl_semi_sync_master_clients--;
 
   /* Only switch off if semi-sync is enabled and is on */
