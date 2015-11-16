@@ -2218,6 +2218,14 @@ static int binlog_savepoint_set(handlerton *hton, THD *thd, void *sv)
     DBUG_RETURN(0);
 
   char buf[1024];
+
+  /*
+    Clear table maps before writing SAVEPOINT event. This enforces
+    recreation of table map events for the following row event.
+    TODO add the test case, see https://github.com/codership/mysql-wsrep/issues/110
+   */
+  thd->clear_binlog_table_maps();
+
   String log_query(buf, sizeof(buf), &my_charset_bin);
   if (log_query.copy(STRING_WITH_LEN("SAVEPOINT "), &my_charset_bin) ||
       append_identifier(thd, &log_query,
