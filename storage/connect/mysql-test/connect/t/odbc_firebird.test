@@ -9,6 +9,9 @@ SET NAMES utf8;
 CREATE TABLE t1 ENGINE=CONNECT TABLE_TYPE=ODBC CONNECTION='Bad connection string';
 
 CREATE TABLE t1 ENGINE=CONNECT TABLE_TYPE=ODBC CATFUNC=Sources;
+if (`select count(*)=0 from t1 where name='firebird'`) {
+  skip No Firebird;
+}
 SHOW CREATE TABLE t1;
 SELECT * FROM t1;
 DROP TABLE t1;
