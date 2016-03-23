@@ -74,6 +74,7 @@ struct rpl_parallel_thread {
   mysql_mutex_t LOCK_rpl_thread;
   mysql_cond_t COND_rpl_thread;
   mysql_cond_t COND_rpl_thread_queue;
+  mysql_cond_t COND_rpl_thread_stop;
   struct rpl_parallel_thread *next;             /* For free list. */
   struct rpl_parallel_thread_pool *pool;
   THD *thd;
@@ -295,7 +296,7 @@ struct rpl_parallel_entry {
     group here. Then later event groups (with higher sub_id) can know not to
     try to start (event groups that already started will be rolled back when
     wait_for_prior_commit() returns error).
-    The value is ULONGLONG_MAX when no error occured.
+    The value is ULONGLONG_MAX when no error occurred.
   */
   uint64 stop_on_error_sub_id;
   /*

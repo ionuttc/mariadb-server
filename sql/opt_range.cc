@@ -3557,9 +3557,9 @@ bool calculate_cond_selectivity_for_table(THD *thd, TABLE *table, Item *cond)
 	    break; 
           bitmap_set_bit(&handled_columns, key_part->fieldnr-1);
         }
-        double selectivity_mult;
         if (i)
         {
+          double UNINIT_VAR(selectivity_mult);
           /* 
             There is at least 1-column prefix of columns whose selectivity has
             not yet been accounted for.
@@ -4931,15 +4931,14 @@ static bool create_partition_index_description(PART_PRUNE_PARAM *ppar)
   Field **field= (ppar->part_fields)? part_info->part_field_array :
                                            part_info->subpart_field_array;
   bool in_subpart_fields= FALSE;
-  uint max_key_len= 0;
-  uint cur_key_len= 0;
+  uint total_key_len= 0;
   for (uint part= 0; part < total_parts; part++, key_part++)
   {
     key_part->key=          0;
     key_part->part=	    part;
     key_part->length= (uint16)(*field)->key_length();
     key_part->store_length= (uint16)get_partition_field_store_length(*field);
-    cur_key_len += key_part->store_length;
+    total_key_len += key_part->store_length;
 
     DBUG_PRINT("info", ("part %u length %u store_length %u", part,
                          key_part->length, key_part->store_length));
@@ -4965,18 +4964,13 @@ static bool create_partition_index_description(PART_PRUNE_PARAM *ppar)
     {
       field= part_info->subpart_field_array;
       in_subpart_fields= TRUE;
-      max_key_len= cur_key_len;
-      cur_key_len= 0;
     }
   }
   range_par->key_parts_end= key_part;
 
-  if (cur_key_len > max_key_len)
-    max_key_len= cur_key_len;
-
-  max_key_len++; /* Take into account the "+1" in QUICK_RANGE::QUICK_RANGE */
-  if (!(range_par->min_key= (uchar*)alloc_root(alloc,max_key_len)) ||
-      !(range_par->max_key= (uchar*)alloc_root(alloc,max_key_len)))
+  total_key_len++; /* Take into account the "+1" in QUICK_RANGE::QUICK_RANGE */
+  if (!(range_par->min_key= (uchar*)alloc_root(alloc,total_key_len)) ||
+      !(range_par->max_key= (uchar*)alloc_root(alloc,total_key_len)))
   {
     return true;
   }
